@@ -76,6 +76,10 @@ while (tcpListener.Server.IsBound)
                 stream: stream
             );
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred while processing a request!  Error message: {0}", ex.Message);
+        }
         finally
         {
             tcp.Close();
