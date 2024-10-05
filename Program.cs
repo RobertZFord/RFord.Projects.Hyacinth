@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Microsoft.Extensions.FileProviders;
@@ -39,7 +39,42 @@ while (tcpListener.Server.IsBound)
     // wait for a connection
     //  `cat`ing a 3MB into `netcat` results in about 124096 bytes
     // available vs the 131072 buffer, yielding 6976 bytes of overhead
-    using (TcpClient tcp = await tcpListener.AcceptTcpClientAsync())
+    TcpClient tcp = await tcpListener.AcceptTcpClientAsync();
+    _ = ThreadPool.QueueUserWorkItem(Handler, tcp);
+}
+
+// supporting methods
+
+async void Handler(object? state)
+{
+    // async voids are bad, so we want to catch anything that might explode the program!
+    try
+    {
+        if (state is not TcpClient tcp)
+        {
+            if (state is IDisposable disposable)
+            {
+                // at least try to prevent any runaway memory leaks
+                disposable.Dispose();
+            }
+            return;
+        }
+
+        await InternalHandler(tcp);
+
+        tcp.Dispose();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(
+            "An error occurred in the thread handler!  Error message: {0}",
+            ex.Message
+        );
+    }
+}
+
+async Task InternalHandler(TcpClient tcp)
+{
     using (NetworkStream stream = tcp.GetStream())
     {
         try
@@ -51,7 +86,7 @@ while (tcpListener.Server.IsBound)
                 if (tcp.Available > 16_384)
                 {
                     Console.WriteLine("Ignoring oversized request!");
-                    continue;
+                    return;
                 }
 
                 byte[] b = new byte[tcp.Available];
@@ -86,6 +121,8 @@ while (tcpListener.Server.IsBound)
             stream.Close();
         }
     }
+
+    tcp.Dispose();
 }
 
 async Task WriteResponse(string path, Stream stream)
