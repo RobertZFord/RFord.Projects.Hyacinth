@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Microsoft.Extensions.FileProviders;
@@ -50,6 +50,7 @@ while (tcpListener.Server.IsBound)
                 // discard large requests
                 if (tcp.Available > 16_384)
                 {
+                    Console.WriteLine("Ignoring oversized request!");
                     continue;
                 }
 
