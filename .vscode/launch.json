@@ -1,0 +1,19 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name":"C#: Hyacinth Debug",
+            "type": "coreclr",
+            "preLaunchTask": "dotnet: build", // WHY IS THIS NOT DOCUMENTED
+            "args":[
+                
+            ],
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/Debug/net8.0/RFord.Projects.Hyacinth.dll"
+        }
+    ]
+}
